@@ -49,25 +49,6 @@ const toggleColor = () => {
   }
 };
 /**
- * Sets default payment method or displays chosen method
- */
-const paymentDisplay = (target) => {
-  if (!target) {
-    payment.children[1].setAttribute("selected", "");
-    paymentDisplay(payment.children[1]);
-  } else {
-    const value = target.value;
-    const methods = document.querySelector(".payment-methods").children;
-    for (let i = 2; i < methods.length; i++) {
-      if (methods[i].id === value) {
-        methods[i].style.display = "block";
-      } else {
-        methods[i].style.display = "none";
-      }
-    }
-  }
-};
-/**
  * displays or removes hints
  */
 const toggleHint = (element, bool) => {
@@ -91,15 +72,6 @@ const isChecked = function () {
   }
   return false;
 };
-
-// start up methods and function calls
-addOther();
-userName.focus();
-toggleColor();
-paymentDisplay();
-
-// Event Handlers
-
 /**
  * Adds/Subtracts the cost of an activity to/from the total and displays it.
  */
@@ -116,6 +88,33 @@ const activitiesCheck = (e) => {
   number += cost;
   activitiesCost.textContent = `Total: $${number}`;
 };
+/**
+ * Sets default payment method or displays chosen method
+ */
+const paymentDisplay = (target) => {
+  if (!target) {
+    payment.children[1].setAttribute("selected", "");
+    paymentDisplay(payment.children[1]);
+  } else {
+    const value = target.value;
+    const methods = document.querySelector(".payment-methods").children;
+    for (let i = 2; i < methods.length; i++) {
+      if (methods[i].id === value) {
+        methods[i].style.display = "block";
+      } else {
+        methods[i].style.display = "none";
+      }
+    }
+  }
+};
+// start up methods and function calls
+addOther();
+userName.focus();
+toggleColor();
+paymentDisplay();
+
+// Event Handlers
+
 /**
  * Handles focus changes in the activities section
  */
