@@ -48,17 +48,7 @@ const toggleColor = () => {
     }
   }
 };
-/**
- * displays or removes hints
- */
-const toggleHint = (element, bool) => {
-  const validity = bool
-    ? ["valid", "not-valid", "none"]
-    : ["not-valid", "valid", "block"];
-  element.classList.add(validity[0]);
-  element.classList.remove(validity[1]);
-  element.lastElementChild.style.display = validity[2];
-};
+
 /**
  * Checks to see if activities are checked. Returns a boolean.
  *
@@ -89,6 +79,46 @@ const activitiesCheck = (e) => {
   activitiesCost.textContent = `Total: $${number}`;
 };
 /**
+ * disables conflicting activities
+ */
+const conflictHandler = (e) => {
+  const element = e.target;
+  const checkboxes = activities.querySelectorAll("input");
+  const boxCheck = () => {
+    let boxArray = [];
+    for (let checkbox of checkboxes) {
+      if (
+        element.getAttribute("data-day-and-time") ===
+          checkbox.getAttribute("data-day-and-time") &&
+        element !== checkbox
+      ) {
+        boxArray.push(checkbox);
+      }
+    }
+    return boxArray;
+  };
+  const toggleBox = (toggle) => {
+    const array = boxCheck();
+    array.forEach((box) => {
+      if (toggle) {
+        box.setAttribute("disabled", true);
+        box.parentElement.classList.add("disabled");
+      } else {
+        box.removeAttribute("disabled");
+        box.parentElement.classList.remove("disabled");
+      }
+    });
+  };
+  if (element.checked) {
+    {
+      toggleBox(true);
+    }
+  } else {
+    toggleBox(false);
+  }
+};
+
+/**
  * Sets default payment method or displays chosen method
  */
 const paymentDisplay = (target) => {
@@ -106,6 +136,39 @@ const paymentDisplay = (target) => {
       }
     }
   }
+};
+/**
+ * returns whether input is valid for the field
+ */
+const isValid = (input, type) => {
+  const validObj = {
+    name: /^\w+/,
+    email: /^\w+@\w+\.com$/,
+    cardNumber: /^\d{13,16}$/,
+    zipCode: /^\d{5}$/,
+    ccv: /^\d{3}$/,
+  };
+  return validObj[type].test(input);
+};
+/**
+ * displays or removes hints
+ */
+const toggleHint = (element, bool) => {
+  if (element.querySelector("input") === email) {
+    if (!email.value) {
+      element.lastElementChild.textContent =
+        "Email Address field cannot be blank";
+    } else {
+      element.lastElementChild.textContent =
+        "Email address must be formatted correctly";
+    }
+  }
+  const validity = bool
+    ? ["valid", "not-valid", "none"]
+    : ["not-valid", "valid", "block"];
+  element.classList.add(validity[0]);
+  element.classList.remove(validity[1]);
+  element.lastElementChild.style.display = validity[2];
 };
 // start up methods and function calls
 addOther();
@@ -134,10 +197,23 @@ form.addEventListener("change", (e) => {
     addOther();
   } else if (e.target === design) {
     toggleColor();
-  } else if (e.target === activities) {
+  } else if (e.target.type === "checkbox") {
     activitiesCheck(e);
+    conflictHandler(e);
   } else if (e.target === payment) {
     paymentDisplay(e.target);
+  }
+});
+/**
+ * key up handler for real-time error message
+ */
+form.addEventListener("keyup", (e) => {
+  const validName = isValid(userName.value, "name");
+  const validEmail = isValid(email.value, "email");
+  if (e.target === userName) {
+    toggleHint(userName.parentElement, validName);
+  } else if (e.target === email) {
+    toggleHint(email.parentElement, validEmail);
   }
 });
 /**
@@ -145,8 +221,8 @@ form.addEventListener("change", (e) => {
  *
  */
 form.addEventListener("submit", (e) => {
-  const validName = /^\w+/.test(userName.value);
-  const validEmail = /^\w+@\w+\.com$/.test(email.value);
+  const validName = isValid(userName.value, "name");
+  const validEmail = isValid(email.value, "email");
   const checked = isChecked();
   let validPayment = true;
   toggleHint(userName.parentElement, validName);
@@ -155,9 +231,9 @@ form.addEventListener("submit", (e) => {
   if (payment.value === "credit-card") {
     const inputs = creditCard.querySelectorAll("input");
     const validCreditCard = [
-      /^\d{13,16}$/.test(inputs[0].value),
-      /^\d{5}$/.test(inputs[1].value),
-      /^\d{3}$/.test(inputs[2].value),
+      isValid(inputs[0].value, "cardNumber"),
+      isValid(inputs[1].value, "zipCode"),
+      isValid(inputs[2].value, "ccv"),
     ];
     for (let i in validCreditCard) {
       toggleHint(inputs[i].parentElement, validCreditCard[i]);
