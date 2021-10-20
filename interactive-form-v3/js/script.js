@@ -146,8 +146,6 @@ form.addEventListener("change", (e) => {
  *
  */
 form.addEventListener("submit", (e) => {
-  let error = 0;
-  e.preventDefault();
   const validName = /^\w+/.test(userName.value);
   const validEmail = /^\w+@\w+\.com$/.test(email.value);
   const checked = isChecked();
