@@ -101,21 +101,9 @@ paymentDisplay();
 // Event Handlers
 
 /**
- * Adds job role text input when other is selected
- */
-title.addEventListener("change", () => {
-  addOther();
-});
-/**
- * Enables shirt color selector when a design is chosen
- */
-design.addEventListener("change", () => {
-  toggleColor();
-});
-/**
  * Adds/Subtracts the cost of an activity to/from the total and displays it.
  */
-activities.addEventListener("change", (e) => {
+const activitiesCheck = (e) => {
   let cost = 0;
   const checkbox = e.target;
   if (checkbox.checked) {
@@ -127,7 +115,10 @@ activities.addEventListener("change", (e) => {
   let number = parseInt(activitiesCost.textContent.slice(8));
   number += cost;
   activitiesCost.textContent = `Total: $${number}`;
-});
+};
+/**
+ * Handles focus changes in the activities section
+ */
 for (child of activities.querySelectorAll("input")) {
   child.addEventListener("focus", (e) => {
     e.target.parentNode.className = "focus";
@@ -137,13 +128,21 @@ for (child of activities.querySelectorAll("input")) {
   });
 }
 /**
- *
+ * Consolidated change handler
  */
-payment.addEventListener("change", (e) => {
-  paymentDisplay(e.target);
+form.addEventListener("change", (e) => {
+  if (e.target === title) {
+    addOther();
+  } else if (e.target === design) {
+    toggleColor();
+  } else if (e.target === activities) {
+    activitiesCheck(e);
+  } else if (e.target === payment) {
+    paymentDisplay(e.target);
+  }
 });
 /**
- *
+ *Checks for complete and valid form entries before submitting
  *
  */
 form.addEventListener("submit", (e) => {
