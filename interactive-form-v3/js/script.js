@@ -1,17 +1,22 @@
 // Variable declarations
+const form = document.querySelector("form");
+
 const userName = document.getElementById("name");
 const email = document.getElementById("email");
+
 const title = document.getElementById("title");
 const other = document.getElementById("other-job-role");
+
 const design = document.getElementById("design");
 const color = document.getElementById("color");
+
 const activities = document.getElementById("activities");
 const activitiesCost = document.getElementById("activities-cost");
+
 const payment = document.getElementById("payment");
 const paypal = document.getElementById("paypal");
 const bitcoin = document.getElementById("bitcoin");
 const creditCard = document.getElementById("credit-card");
-const form = document.querySelector("form");
 
 //function declarations
 
@@ -20,7 +25,7 @@ const form = document.querySelector("form");
  */
 const addOther = () => {
   if (title.value === "other") {
-    other.style.hidden = "";
+    other.style.display = "";
   } else {
     other.style.display = "none";
   }
@@ -44,12 +49,47 @@ const toggleColor = () => {
   }
 };
 /**
- * Sets default payment method
+ * Sets default payment method or displays chosen method
  */
-const paymentDisplay = () => {
-  payment.children[1].setAttribute("selected", "");
-  paypal.style.display = "none";
-  bitcoin.style.display = "none";
+const paymentDisplay = (target) => {
+  if (!target) {
+    payment.children[1].setAttribute("selected", "");
+    paymentDisplay(payment.children[1]);
+  } else {
+    const value = target.value;
+    const methods = document.querySelector(".payment-methods").children;
+    for (let i = 2; i < methods.length; i++) {
+      if (methods[i].id === value) {
+        methods[i].style.display = "block";
+      } else {
+        methods[i].style.display = "none";
+      }
+    }
+  }
+};
+/**
+ * displays or removes hints
+ */
+const toggleHint = (element, bool) => {
+  const validity = bool
+    ? ["valid", "not-valid", "none"]
+    : ["not-valid", "valid", "block"];
+  element.classList.add(validity[0]);
+  element.classList.remove(validity[1]);
+  element.lastElementChild.style.display = validity[2];
+};
+/**
+ * Checks to see if activities are checked. Returns a boolean.
+ *
+ */
+const isChecked = function () {
+  let inputs = activities.querySelectorAll("input");
+  for (let input of inputs) {
+    if (input.checked) {
+      return true;
+    }
+  }
+  return false;
 };
 
 // start up methods and function calls
@@ -96,57 +136,45 @@ for (child of activities.querySelectorAll("input")) {
     e.target.parentNode.className = "";
   });
 }
-
+/**
+ *
+ */
+payment.addEventListener("change", (e) => {
+  paymentDisplay(e.target);
+});
 /**
  *
  *
  */
 form.addEventListener("submit", (e) => {
   let error = 0;
-  if (!/^\w+/.test(userName.value)) {
-    userName.parentElement.classList.add("not-valid");
-    userName.parentElement.classList.remove("valid");
-    userName.parentElement.lastElementChild.style.display = "block";
-    error++;
-  } else {
-    userName.parentElement.classList.add("valid");
-    userName.parentElement.classList.remove("not-valid");
-    userName.parentElement.lastElementChild.style.display = "none";
-  }
-  if (!/^\w+@\w+\.com$/.test(email.value)) {
-    email.parentElement.classList.add("not-valid");
-    email.parentElement.classList.remove("valid");
-    email.parentElement.lastElementChild.style.display = "block";
-    error++;
-  } else {
-    email.parentElement.classList.add("valid");
-    email.parentElement.classList.remove("not-valid");
-    email.parentElement.lastElementChild.style.display = "none";
-  }
-
-  let check;
-  for (child of activities.querySelectorAll("input")) {
-    if (child.checked) {
-      check = true;
-      break;
-    }
-  }
-  if (!check) {
-    error++;
-  }
+  e.preventDefault();
+  const validName = /^\w+/.test(userName.value);
+  const validEmail = /^\w+@\w+\.com$/.test(email.value);
+  const checked = isChecked();
+  let validPayment = true;
+  toggleHint(userName.parentElement, validName);
+  toggleHint(email.parentElement, validEmail);
+  toggleHint(activities, checked);
   if (payment.value === "credit-card") {
     const inputs = creditCard.querySelectorAll("input");
-    if (!/^\d{13,16}$/.test(inputs[0].value)) {
-      error++;
+    const validCreditCard = [
+      /^\d{13,16}$/.test(inputs[0].value),
+      /^\d{5}$/.test(inputs[1].value),
+      /^\d{3}$/.test(inputs[2].value),
+    ];
+    for (let i in validCreditCard) {
+      toggleHint(inputs[i].parentElement, validCreditCard[i]);
     }
-    if (!/^\d{5}$/.test(inputs[1].value)) {
-      error++;
-    }
-    if (!/^\d{3}$/.test(inputs[2].value)) {
-      error++;
+    if (validCreditCard[0] && validCreditCard[1] && validCreditCard[2]) {
+      validPayment = true;
+    } else {
+      validPayment = false;
     }
   }
-  if (error) {
+  if (validName && validEmail && checked && validPayment) {
+    console.log("Submitted!");
+  } else {
     e.preventDefault();
   }
 });
