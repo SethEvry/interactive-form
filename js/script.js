@@ -46,6 +46,7 @@ const toggleColor = () => {
         option.removeAttribute("hidden");
       }
     }
+    color.value = null;
   }
 };
 
