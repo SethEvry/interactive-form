@@ -46,7 +46,7 @@ const toggleColor = () => {
         option.removeAttribute("hidden");
       }
     }
-    color.value = null;
+    color.value = options[0].value;
   }
 };
 
